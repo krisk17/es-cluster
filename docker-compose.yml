@@ -32,18 +32,6 @@ services:
       timeout: 10s
       retries: 5
 
-  kibana01:
-    container_name: kibana01
-    image: docker.elastic.co/kibana/kibana:7.5.1
-    environment:
-      SERVER_NAME: kibana01
-      ELASTICSEARCH_HOSTS: https://es01:9200
-      ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: $ELASTIC_PASSWORD
-    volumes: ['data01:/usr/share/elasticsearch/data', 'certs:$CERTS_DIR']
-    ports:
-      - 5601:5601
-
   wait_until_ready:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
     command: /usr/bin/true
