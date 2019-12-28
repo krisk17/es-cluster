@@ -6,10 +6,11 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
     environment:
       - node.name=es01
-      - discovery.seed_hosts=es01,es02
-      - cluster.initial_master_nodes=es01,es02
-      - ELASTIC_PASSWORD=$ELASTIC_PASSWORD 
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01
+      - cluster.name=docker-cluster
+      - ELASTIC_PASSWORD=$ELASTIC_PASSWORD
+      - "ES_JAVA_OPTS=-Xms128m -Xmx128m"
       - xpack.license.self_generated.type=trial 
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
@@ -24,11 +25,24 @@ services:
     volumes: ['data01:/usr/share/elasticsearch/data', 'certs:$CERTS_DIR']
     ports:
       - 9200:9200
+      - 9300:9300
     healthcheck:
       test: curl --cacert $CERTS_DIR/ca/ca.crt -s https://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       interval: 30s
       timeout: 10s
       retries: 5
+
+  kibana01:
+    container_name: kibana01
+    image: docker.elastic.co/kibana/kibana:7.5.1
+    environment:
+      SERVER_NAME: kibana01
+      ELASTICSEARCH_HOSTS: https://es01:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: $ELASTIC_PASSWORD
+    volumes: ['data01:/usr/share/elasticsearch/data', 'certs:$CERTS_DIR']
+    ports:
+      - 5601:5601
 
   wait_until_ready:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
